@@ -20,11 +20,20 @@ export default class NewBill {
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
+
+    var regex = new RegExp("\.(jpg|jpeg|png)$","i"); 
+    if (fileName.match(regex)){  
+      return true;  
+   } else {  
+      alert ("Extension non autorisée")
+      return false;  
+   }  
+
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
     formData.append('file', file)
     formData.append('email', email)
-
+    console.log(file);
     this.store
       .bills()
       .create({

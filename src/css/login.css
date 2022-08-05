@@ -65,6 +65,11 @@ input {
 .title-container h1 {
   margin-left: 16px;
   margin-bottom: 60px;
+ 
+}
+.title-container svg{
+ 
+ 
 }
 button {
   background-color: #0E5AE5;

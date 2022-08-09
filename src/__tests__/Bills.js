@@ -35,5 +35,16 @@ describe("Given I am connected as an employee", () => {
       const datesSorted = [...dates].sort(antiChrono)
       expect(dates).toEqual(datesSorted)
     })
+
+
+    describe("When i click on icon eye", () => {
+      it("should open a modal", () => {
+        
+      })
+    })
+
   })
 })
+
+
+  

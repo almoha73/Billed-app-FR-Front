@@ -5,9 +5,7 @@ import Logout from "./Logout.js"
 export default class {
   constructor({ document, onNavigate, store, localStorage }) {
     this.document = document
-    
-    this.onNavigate = onNavigate
-    
+    this.onNavigate = onNavigate 
     this.store = store
     
     const buttonNewBill = document.querySelector(`button[data-testid="btn-new-bill"]`)

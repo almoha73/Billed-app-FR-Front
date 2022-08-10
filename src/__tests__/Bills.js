@@ -87,7 +87,17 @@ describe("Given I am connected as an employee", () => {
       expect(handleClickIconEyeMoked).toHaveBeenCalled();
       const modale = document.getElementById("modaleFile");
       expect(modale).toBeTruthy();
-  
+
+      })
+
+      describe("When i cick on the close button", () => {
+        test("the modal can be closed", () => {
+          const modale = document.getElementById("modaleFile");
+          const close = document.querySelector(".close")
+          close.addEventListener('click', () => {
+            expext(modale).toBeFalsy()
+          })
+        })
       })
     })
     

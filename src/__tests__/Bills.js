@@ -1,13 +1,14 @@
 /**
  * @jest-environment jsdom
  */
-
-import {screen, waitFor} from "@testing-library/dom"
+import Bills from '../containers/Bills.js';
+import {fireEvent, screen, waitFor} from '@testing-library/dom'
+import userEvent from '@testing-library/user-event'
 import BillsUI from "../views/BillsUI.js"
-import { bills } from "../fixtures/bills.js"
+import { bills } from "../fixtures/bills.js";
 import { ROUTES_PATH} from "../constants/routes.js";
 import {localStorageMock} from "../__mocks__/localStorage.js";
-
+import mockStore from "../__mocks__/store";
 import router from "../app/Router.js";
 
 describe("Given I am connected as an employee", () => {
@@ -42,17 +43,57 @@ describe("Given I am connected as an employee", () => {
     test("there is an iconeye button displayed", () => {
       document.body.innerHTML = BillsUI({ data: bills })
       expect(screen.getAllByTestId('icon-eye')).toBeDefined()
+      
     })
 
     test("there is a new bill button displayed", () => {
       document.body.innerHTML = BillsUI({ data: bills })
       expect(screen.getByTestId('btn-new-bill')).toBeDefined()
     })
-
     
+    describe("when I click the eye icon", () => {
+      test("a modal must open", () => {
+  
+       Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+        })
+      );
+      $.fn.modal = jest.fn();
 
+      document.body.innerHTML = BillsUI({ data: [bills[0]] });
+
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+
+      const store = mockStore
+      
+      const theBills  = new Bills({
+        document,
+        onNavigate,
+        store,
+        localStorage: window.localStorage,
+      });
+
+      const iconEye = screen.getByTestId("icon-eye");
+      const handleClickIconEyeMoked = jest.fn(theBills.handleClickIconEye);
+
+      iconEye.addEventListener("click", () => handleClickIconEyeMoked(iconEye));
+
+      userEvent.click(iconEye);
+      expect(handleClickIconEyeMoked).toHaveBeenCalled();
+      const modale = document.getElementById("modaleFile");
+      expect(modale).toBeTruthy();
+  
+      })
+    })
+    
   })
+    
 })
 
 
-  
+

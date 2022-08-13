@@ -20,7 +20,7 @@ const row = (bill) => {
 };
 
 const rows = (data) => {
-  console.log(data);
+  console.log("data/row:", data);
 
   return data && data.length
     ? data

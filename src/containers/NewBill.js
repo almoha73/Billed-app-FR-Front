@@ -22,9 +22,9 @@ export default class NewBill {
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
 
-    var regex = new RegExp("\.(jpg|jpeg|png)$","i"); 
+    const regex = new RegExp("\.(jpg|jpeg|png)$","i"); 
     
-    if (! fileName.match(regex)){  
+    if (!fileName.match(regex)){  
       alert ("Extension non autorisée")
       return false;  
     }
@@ -52,7 +52,7 @@ export default class NewBill {
 
 
   
-  handleSubmit = e => {
+  handleSubmit = (e) => {
     e.preventDefault()
     console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
     const email = JSON.parse(localStorage.getItem("user")).email
@@ -73,7 +73,7 @@ export default class NewBill {
     this.onNavigate(ROUTES_PATH['Bills'])
   }
 
-  // not need to cover this function by tests
+  // not need to cover this function by tests ==> je l'ai fait quand même
   updateBill = (bill) => {
     if (this.store) {
       this.store

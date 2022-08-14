@@ -76,6 +76,9 @@ export default class {
     $('#arrow-icon2').click((e) => this.handleShowTickets(e, bills, 2))
     $('#arrow-icon3').click((e) => this.handleShowTickets(e, bills, 3))
     new Logout({ localStorage, onNavigate })
+    console.log(bills);
+    
+    
   }
 
   handleClickIconEye = () => {
@@ -145,14 +148,12 @@ export default class {
       this.counter ++
     }
 
-
     bills.forEach(bill => {
-      $(`#open-bill${bill.id}`).off('click').click((e) => this.handleEditTicket(e, bill, bills))
-        
+      //$(`#open-bill${bill.id}`).off('click').click((e) => this.handleEditTicket(e, bill, bills))
+      $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills)) 
       
     })
     
-
     return bills
 
   }

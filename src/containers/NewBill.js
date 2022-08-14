@@ -69,20 +69,27 @@ export default class NewBill {
       fileName: this.fileName,
       status: 'pending'
     }
-    this.updateBill(bill)
-    this.onNavigate(ROUTES_PATH['Bills'])
+    if(bill.status === 'undefined'){
+      return
+    }
+      this.updateBill(bill)
+      this.onNavigate(ROUTES_PATH['Bills'])
+     
   }
 
   // not need to cover this function by tests ==> je l'ai fait quand même
   updateBill = (bill) => {
-    if (this.store) {
-      this.store
-      .bills()
-      .update({data: JSON.stringify(bill), selector: this.billId})
-      .then(() => {
-        this.onNavigate(ROUTES_PATH['Bills'])
-      })
-      .catch(error => console.error(error))
-    }
+   
+      if (this.store) {
+        this.store
+        .bills()
+        .update({data: JSON.stringify(bill), selector: this.billId})
+        .then(() => {
+          this.onNavigate(ROUTES_PATH['Bills'])
+        })
+        .catch(error => console.error(error))
+      }
+    
+    
   }
 }

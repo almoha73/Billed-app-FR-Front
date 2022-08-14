@@ -58,7 +58,7 @@ describe("When I am on NewBill Page", () => {
       expect(handleSubmitMock).toBeCalled();
     });
 
-    test("the update bills function is executed with the informations provided", () => {
+    test("the update bills function is executed with informations provided", () => {
       document.body.innerHTML = NewBillUI()
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,

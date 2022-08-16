@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
- import {screen, waitFor} from "@testing-library/dom"
+ import {fireEvent, screen, waitFor} from "@testing-library/dom"
  import userEvent from '@testing-library/user-event'
  import BillsUI from "../views/BillsUI.js"
  import Bills from "../containers/Bills"
@@ -72,7 +72,7 @@ describe("Given I am connected as an employee", () => {
           })
         );
         $.fn.modal = jest.fn();
-
+          
         document.body.innerHTML = BillsUI({ data: [bills[0]] });
 
         const onNavigate = (pathname) => {
@@ -101,7 +101,7 @@ describe("Given I am connected as an employee", () => {
         expect(modale).toBeTruthy();
       });
     
-      describe("When i cick on the close button", () => {
+      describe("When i click on the close button", () => {
         test("the modal can be closed", () => {
           const modale = document.getElementById("modaleFile");
           const close = document.querySelector(".close");
@@ -163,7 +163,7 @@ describe("When I navigate to Bills", () => {
       )
       window.localStorage.setItem('user', JSON.stringify({
         type: 'Employee',
-        email: "a@a"
+        email: "test@test"
       }))
       const root = document.createElement("div")
       root.setAttribute("id", "root")

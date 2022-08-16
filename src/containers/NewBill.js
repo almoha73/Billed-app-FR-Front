@@ -16,7 +16,8 @@ export default class NewBill {
     new Logout({ document, localStorage, onNavigate })
   }
 
-  handleChangeFile = e => {
+  handleChangeFile = (e) => {
+    console.log(e);
     e.preventDefault()
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const filePath = e.target.value.split(/\\/g)

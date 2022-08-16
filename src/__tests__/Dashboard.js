@@ -13,7 +13,7 @@ import mockStore from "../__mocks__/store"
 import { bills } from "../fixtures/bills"
 import router from "../app/Router"
 
-jest.mock("../app/Store", () => mockStore)
+jest.mock("../app/Store/js", () => mockStore)
 
 describe('Given I am connected as an Admin', () => {
   describe('When I am on Dashboard page, there are bills, and there is one pending', () => {
@@ -242,7 +242,7 @@ describe('Given I am connected as Admin and I am on Dashboard page and I clicked
 
 // test d'intégration GET
 describe("Given I am a user connected as Admin", () => {
-  describe("When I navigate to Dashboard", () => {
+  describe("When I navigate to NewBill", () => {
     test("fetches bills from mock API GET", async () => {
       localStorage.setItem("user", JSON.stringify({ type: "Admin", email: "a@a" }));
       const root = document.createElement("div")
@@ -250,12 +250,8 @@ describe("Given I am a user connected as Admin", () => {
       document.body.append(root)
       router()
       window.onNavigate(ROUTES_PATH.Dashboard)
-      await waitFor(() => screen.getByText("Validations"))
-      const contentPending  = await screen.getByText("En attente (1)")
-      expect(contentPending).toBeTruthy()
-      const contentRefused  = await screen.getByText("Refusé (2)")
-      expect(contentRefused).toBeTruthy()
-      expect(screen.getByTestId("big-billed-icon")).toBeTruthy()
+      await expect(waitFor(() => screen.getByText("Envoyer une note de frais")))
+      
     })
   describe("When an error occurs on API", () => {
     beforeEach(() => {

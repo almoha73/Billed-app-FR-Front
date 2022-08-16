@@ -163,7 +163,7 @@ describe("When I navigate to Bills", () => {
       )
       window.localStorage.setItem('user', JSON.stringify({
         type: 'Employee',
-        email: "a@a"
+        email: "test@test"
       }))
       const root = document.createElement("div")
       root.setAttribute("id", "root")

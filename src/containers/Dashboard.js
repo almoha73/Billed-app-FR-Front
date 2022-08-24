@@ -149,8 +149,8 @@ export default class {
     }
 
     bills.forEach(bill => {
-      //$(`#open-bill${bill.id}`).off('click').click((e) => this.handleEditTicket(e, bill, bills))
-      $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills)) 
+      $(`#open-bill${bill.id}`).off('click').click((e) => this.handleEditTicket(e, bill, bills)) // ---> ajout de .off('click')
+      //$(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills)) 
       
     })
     

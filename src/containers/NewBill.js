@@ -24,10 +24,12 @@ export default class NewBill {
     const fileName = filePath[filePath.length-1]
 
     const formData = new FormData()
+    
     const email = JSON.parse(localStorage.getItem("user")).email
 
     const regex = new RegExp("\.(jpg|jpeg|png)$","i"); 
     if (!fileName.match(regex)){  
+      
       alert ("Extension non autorisée")
       return ;  
     }

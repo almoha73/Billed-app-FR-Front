@@ -10,6 +10,7 @@ export default class NewBill {
     formNewBill.addEventListener("submit", this.handleSubmit)
     const file = this.document.querySelector(`input[data-testid="file"]`)
     file.addEventListener("change", this.handleChangeFile)
+    //formNewBill.addEventListener("submit", this.handleSubmit)
     this.fileUrl = null
     this.fileName = null
     this.billId = null
@@ -17,25 +18,21 @@ export default class NewBill {
   }
 
   handleChangeFile = (e) => {
-    console.log(e);
     e.preventDefault()
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
 
-    const regex = new RegExp("\.(jpg|jpeg|png)$","i"); 
-    
-    if (!fileName.match(regex)){  
-      alert ("Extension non autorisée")
-      return false;  
-    }
-
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
+
+    const regex = new RegExp("\.(jpg|jpeg|png)$","i"); 
+    if (!fileName.match(regex)){  
+      alert ("Extension non autorisée")
+      return ;  
+    }
     formData.append('file', file)
     formData.append('email', email)
-    console.log(file);
-    console.log(formData);
     this.store
       .bills()
       .create({
@@ -45,18 +42,14 @@ export default class NewBill {
         }
       })
       .then(({fileUrl, key}) => {
-        console.log(fileUrl)
         this.billId = key
         this.fileUrl = fileUrl
         this.fileName = fileName
       }).catch(error => console.error(error))
   }
 
-
-  
   handleSubmit = (e) => {
     e.preventDefault()
-    console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
     const email = JSON.parse(localStorage.getItem("user")).email
     const bill = {
       email,
@@ -70,17 +63,17 @@ export default class NewBill {
       fileUrl: this.fileUrl,
       fileName: this.fileName,
       status: 'pending'
-    }
-    
-      this.updateBill(bill)
-      this.onNavigate(ROUTES_PATH['Bills'])
-     
-  }
+    } 
+      
+        this.updateBill(bill)
+        this.onNavigate(ROUTES_PATH['Bills'])  
+      }
+  
+      
+  
 
-  // not need to cover this function by tests ==> je l'ai fait quand même
-  updateBill = (bill) => {
-   
-      if (this.store) {
+  updateBill = (bill) => { 
+      if (this.store) { 
         this.store
         .bills()
         .update({data: JSON.stringify(bill), selector: this.billId})
@@ -88,8 +81,7 @@ export default class NewBill {
           this.onNavigate(ROUTES_PATH['Bills'])
         })
         .catch(error => console.error(error))
-      }
-    
-    
+      }  
+      console.log(this.store);
   }
 }

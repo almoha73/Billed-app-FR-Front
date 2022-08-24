@@ -11,9 +11,10 @@ import router from "../app/Router.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
 import { fireEvent,waitFor, screen, getByRole } from "@testing-library/dom";
 import mockStore from "../__mocks__/store";
-import { formatDate } from "../app/format.js";
+
 
 describe("When I am on NewBill Page", () => {
+  
   test("Then mail icon in vertical layout should be highlighted ", async () => {
     Object.defineProperty(window, "localStorage", { value: localStorageMock });
     window.localStorage.setItem(
@@ -29,8 +30,8 @@ describe("When I am on NewBill Page", () => {
     window.onNavigate(ROUTES_PATH["NewBill"]);
     await waitFor(() => screen.getByTestId("icon-mail"));
     const windowIcon = screen.getByTestId("icon-mail");
-    //to-do write expect expression
     expect(windowIcon.classList.contains("active-icon")).toBe(true);
+   
   });
 
   describe("when i click on the submit button", () => {
@@ -159,7 +160,7 @@ describe("When I am on NewBill Page", () => {
           files: [new File(['test.jpg'], 'test.jpg', {type: 'image/jpg'})]
         }
       })
-      expect(handleChangeFile).toHaveBeenCalled()
+      expect(handleChangeFile).toBeCalled()
       const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
     formData.append('file', inputFile)
@@ -207,20 +208,22 @@ describe("When I am on NewBill Page", () => {
           localStorage: window.localStorage
          })
          window.alert = jest.fn();
-        const handleChangeFile = jest.fn(newBillObject.handleChangeFile)
+        const handle = jest.fn(newBillObject.handleChangeFile)
         const inputFile = screen.getByTestId('file')
-        inputFile.addEventListener('change', handleChangeFile)
+        inputFile.addEventListener('change', handle)
         fireEvent.change(inputFile, {
           target: {
             files: [new File(['test.pdf'], 'test.pdf', {type: 'text/pdf'})]
           }
         })
         expect(inputFile.files[0].name).toBe('test.pdf')
-        expect(handleChangeFile).toHaveReturnedWith(false)
+        expect(handle).toHaveReturnedWith(undefined)
         expect(window.alert).toHaveBeenCalledWith('Extension non autorisée');
         
       })
     });
   })
 })
+
+
 

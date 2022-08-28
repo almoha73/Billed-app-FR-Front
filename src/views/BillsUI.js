@@ -5,7 +5,8 @@ import LoadingPage from "./LoadingPage.js";
 import Actions from "./Actions.js";
 
 const row = (bill) => {
-  return `
+  if(bill.name !== null){
+    return `
     <tr>
       <td>${bill.type}</td>
       <td>${bill.name}</td>
@@ -17,18 +18,23 @@ const row = (bill) => {
       </td>
     </tr>
     `;
+  }else{
+    return ''
+  }
+  
 };
 
 const rows = (data) => {
-  console.log("data/row:", data);
-
-  return data && data.length
+    return data && data.length
     ? data
         .sort((a, b) => (a.date < b.date ? 1 : -1)) //==> ligne ajoutée pour régler bug report 1
-        .map((bill) => row(bill))
+        .map((bill) => {
+            return row(bill)
+        })
         .join("")
-    : "";
-};
+        : "";
+  
+}
 
 export default ({ data: bills, error, loading }) => {
   const modal = () => `

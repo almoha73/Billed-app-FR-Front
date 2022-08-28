@@ -9,20 +9,34 @@ import NewBill from "../containers/NewBill.js";
 import BillsUI from "../views/BillsUI.js";
 import router from "../app/Router.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
-import { fireEvent,waitFor, screen, getByRole } from "@testing-library/dom";
+import { fireEvent, waitFor, screen, getByRole } from "@testing-library/dom";
 import mockStore from "../__mocks__/store";
+import store from "../__mocks__/store";
+import { bills } from "../fixtures/bills.js"
+
 
 
 describe("When I am on NewBill Page", () => {
-  
-  test("Then mail icon in vertical layout should be highlighted ", async () => {
-    Object.defineProperty(window, "localStorage", { value: localStorageMock });
+  beforeEach(() => {
+    Object.defineProperty(window, "localStorage", {
+      value: localStorageMock,
+    });
     window.localStorage.setItem(
       "user",
       JSON.stringify({
         type: "Employee",
+          email: "employee@test-td",
+          password: "employee",
+          status: "connected",
       })
     );
+    const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.appendChild(root)
+      router()
+  });
+  test("Then mail icon in vertical layout should be highlighted ", async () => {
+    
     const root = document.createElement("div");
     root.setAttribute("id", "root");
     document.body.append(root);
@@ -34,45 +48,41 @@ describe("When I am on NewBill Page", () => {
    
   });
 
+  test("Then it should show the new bill form", () => {
+    const html = NewBillUI();
+    document.body.innerHTML = html;
+
+    expect(screen.getByTestId("form-new-bill")).toBeTruthy();
+  });
+
   describe("when i click on the submit button", () => {
     test("the handleSubmit function is called", () => {
-      Object.defineProperty(window, "localStorage", {
-        value: localStorageMock,
-      });
-      window.localStorage.setItem(
-        "user",
-        JSON.stringify({
-          type: "Employee",
-        })
-      );
-      window.onNavigate(ROUTES_PATH["NewBill"]);
-      const store = null;
+      
+      const html = NewBillUI();
+      document.body.innerHTML = html;
+
+      const onNavigate = pathname => {
+        const html = ROUTES({ pathname, data: [] });
+        document.body.innerHTML = html;
+      };
       const newBill = new NewBill({
         document,
         onNavigate,
-        store,
-        localStorage,
+        store: null,
+        localStorage: null,
       });
       const btnSendBill = screen.getByTestId("form-new-bill");
 
       const handleSubmitMock = jest.fn((e) => newBill.handleSubmit(e));
-
       btnSendBill.addEventListener("submit", handleSubmitMock);
-      userEvent.click(getByRole(document.body, "button"));
-      expect(handleSubmitMock).toBeCalled();
+      fireEvent.submit(btnSendBill);
+      expect(handleSubmitMock).toHaveBeenCalled();
+      expect(screen.getByText("Mes notes de frais")).toBeTruthy;
     });
 
     test("the update bills function is executed with informations provided && send to the mock API POST", async () => {
       document.body.innerHTML = NewBillUI()
-      Object.defineProperty(window, "localStorage", {
-        value: localStorageMock,
-      });
-      window.localStorage.setItem(
-        "user",
-        JSON.stringify({
-          type: "Employee",
-        })
-      );
+      
       const onNavigate = jest.fn()
       const store = null;
 
@@ -114,91 +124,118 @@ describe("When I am on NewBill Page", () => {
         expect(postSpy).toHaveBeenCalledTimes(1);
         expect((await bills.list()).length).toBe(4);
         
+        await onNavigate(ROUTES_PATH['Bills'])
+        
+        expect(onNavigate).toBeCalledWith(ROUTES_PATH['Bills'])
+        
     });
 
     
     test("Then it should send the new bill to the mock API POST and fails with 404 message error", async () => {
+      console.error = jest.fn()
+      document.body.innerHTML = NewBillUI()
       mockStore.bills.mockImplementationOnce(() => {
-        return Promise.reject(new Error("Erreur 404"))
-      });
+        return {
+          update : () =>  {
+            return waitFor(()=>Promise.reject(new Error("Erreur 404")))
+          }
+        }})
+        
+        window.onNavigate(ROUTES_PATH.NewBill); 
+      const store = null;
 
-      const html = BillsUI({ error: "Erreur 404" });
-      document.body.innerHTML = html;
-      const message = screen.getByText(/Erreur 404/);
-      expect (message).toBeTruthy();
-    });
+      const newBillObject = new NewBill({
+        document,
+        onNavigate,
+        store,
+        localStorage,
+      });
+      
+       const formNewBill = screen.getByTestId("form-new-bill")
+       const handleSubmit = jest.fn((e) => newBillObject.handleSubmit(e))
+       formNewBill.addEventListener("submit", handleSubmit)
+       fireEvent.submit(formNewBill)
+       expect(handleSubmit).toHaveBeenCalled()
+       await waitFor(() => new Promise(process.nextTick))
+       expect(console.error).toHaveBeenCalled()
+      })
 
     test("Then it should send the new bill to the mock API POST and fails with 500 message error", async () => {
       mockStore.bills.mockImplementationOnce(() => {
-        return Promise.reject(new Error("Erreur 500"))
+        list : () =>  {
+          return Promise.reject(new Error("Erreur 500"))
+        }
       });
-
+      window.onNavigate(ROUTES_PATH.Bills)
+       await new Promise(process.nextTick);
       const html = BillsUI({ error: "Erreur 500" });
       document.body.innerHTML = html;
       const message = screen.getByText(/Erreur 500/);
       expect(message).toBeTruthy();
     });
   });
+})
 
-  describe("When I select a file", () => {
-    test("it should call handleChangeFile method", () => {
-      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-      window.localStorage.setItem('user', JSON.stringify({type: 'Employee'}))
-       const html = NewBillUI()
-       document.body.innerHTML = html
-       const newBillObject = new NewBill({
-        document,
-        onNavigate: (pathname) => document.body.innerHTML = ROUTES({ pathname }),
-        store: mockStore,
-        localStorage: window.localStorage
+
+  describe("When I select a file and the file format is valid", () => {
+      test('it should update the input field', async () => {
+        
+        const html = NewBillUI()
+        document.body.innerHTML = html
+        const newBillObject = new NewBill({
+         document,
+         onNavigate: (pathname) => document.body.innerHTML = ROUTES({ pathname }),
+         store: mockStore,
+         localStorage: window.localStorage
+        })
+       const handle = jest.fn((e) => newBillObject.handleChangeFile(e))
+       const inputFile = screen.getByTestId('file')
+       const img = new File(['img'], 'image.png', {type:'image/png'})
+       
+       inputFile.addEventListener('change', (e) => {
+           handle(e)
        })
-      const handleChangeFile = jest.fn(newBillObject.handleChangeFile)
-      const inputFile = screen.getByTestId('file')
-      inputFile.addEventListener('change', handleChangeFile)
-      fireEvent.change(inputFile, {
-        target: {
-          files: [new File(['test.jpg'], 'test.jpg', {type: 'image/jpg'})]
-        }
+       await waitFor(() => {userEvent.upload(inputFile, img)})
+       
+       
+       expect(handle).toHaveBeenCalled()
+       expect(inputFile.files[0]).toStrictEqual(img)
+        expect(inputFile.files[0].name).toBe('image.png')
+     
+      
       })
-      expect(handleChangeFile).toBeCalled()
-      const formData = new FormData()
-    const email = JSON.parse(localStorage.getItem("user")).email
-    formData.append('file', inputFile)
-    formData.append('email', email)
-    expect(formData).not.toBeNull();
-    })
 
-    
-
-    describe("and the file format is valid", () => {
-      test('it should update the input field', () => {
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-      window.localStorage.setItem('user', JSON.stringify({type: 'Employee'}))
-       const html = NewBillUI()
-       document.body.innerHTML = html
-       const newBillObject = new NewBill({
-        document,
-        onNavigate: (pathname) => document.body.innerHTML = ROUTES({ pathname }),
-        store: mockStore,
-        localStorage: window.localStorage
-       })
-        const handleChangeFile = jest.fn(newBillObject.handleChangeFile)
-        const inputFile = screen.getByTestId('file')
-        inputFile.addEventListener('change', handleChangeFile)
-        fireEvent.change(inputFile, {
-          target: {
-            files: [new File(['test.jpg'], 'test.jpg', {type: 'image/jpg'})]
-          }
+      test('formData not to be null', async () => {
+        
+        const html = NewBillUI()
+        document.body.innerHTML = html
+        const newBillObject = new NewBill({
+         document,
+         onNavigate: (pathname) => document.body.innerHTML = ROUTES({ pathname }),
+         store: mockStore,
+         localStorage: window.localStorage
         })
         
-        expect(inputFile.files[0].name).toBe("test.jpg");
+       const handle = jest.fn((e) => newBillObject.handleChangeFile(e))
+       const inputFile = screen.getByTestId('file')
+       const img = new File(['img'], 'image.png', {type:'image/png'})
+      
+       inputFile.addEventListener('change', (e) => {
+           handle(e)
+       })
+       await waitFor(() => {userEvent.upload(inputFile, img)})
+       const formData = new FormData()
+        const email = JSON.parse(localStorage.getItem("user")).email
+       formData.append('file', inputFile)
+       formData.append('email', email)
+       
+       
       })
-    })
+})
 
-    describe("and the file format is not valid", () => {
-      test('it should not update the input field', () => {
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-        window.localStorage.setItem('user', JSON.stringify({type: 'Employee'}))
+describe("When I select a file and the file format is not valid", () => {
+      test('it should not update the input field', async () => {
+        
          const html = NewBillUI()
          document.body.innerHTML = html
          const newBillObject = new NewBill({
@@ -208,22 +245,25 @@ describe("When I am on NewBill Page", () => {
           localStorage: window.localStorage
          })
          window.alert = jest.fn();
-        const handle = jest.fn(newBillObject.handleChangeFile)
+        const handle = jest.fn((e) => newBillObject.handleChangeFile(e))
         const inputFile = screen.getByTestId('file')
-        inputFile.addEventListener('change', handle)
-        fireEvent.change(inputFile, {
-          target: {
-            files: [new File(['test.pdf'], 'test.pdf', {type: 'text/pdf'})]
-          }
+        
+        inputFile.addEventListener('change', (e) => {
+          handle(e)
         })
+        const file = new File(['img'], 'test.pdf', {type:'application/pdf'})
+        await waitFor(() => {userEvent.upload(inputFile, file)})
+        expect(handle).toHaveBeenCalled()
+       expect(inputFile.files[0]).toStrictEqual(file)
         expect(inputFile.files[0].name).toBe('test.pdf')
-        expect(handle).toHaveReturnedWith(undefined)
-        expect(window.alert).toHaveBeenCalledWith('Extension non autorisée');
+        expect(window.alert).toBeCalled()
+        
+        
         
       })
-    });
+    
   })
-})
+
 
 
 

@@ -10,7 +10,6 @@ export default class NewBill {
     formNewBill.addEventListener("submit", this.handleSubmit)
     const file = this.document.querySelector(`input[data-testid="file"]`)
     file.addEventListener("change", this.handleChangeFile)
-    //formNewBill.addEventListener("submit", this.handleSubmit)
     this.fileUrl = null
     this.fileName = null
     this.billId = null
@@ -22,19 +21,18 @@ export default class NewBill {
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
-
     const formData = new FormData()
-    
     const email = JSON.parse(localStorage.getItem("user")).email
-
-    const regex = new RegExp("\.(jpg|jpeg|png)$","i"); 
-    if (!fileName.match(regex)){  
-      
-      alert ("Extension non autorisée")
-      return ;  
-    }
+    const fileExtension = fileName.split('.').pop()
+    const validExtensions = ['png', 'jpg', 'jpeg']
     formData.append('file', file)
     formData.append('email', email)
+    formData.append("number", 1)
+    console.log(formData);
+    if (!validExtensions.includes(fileExtension)){   
+      window.alert('Les seuls formats acceptés sont : png, jpg, jpeg.')
+      return false;
+    }
     this.store
       .bills()
       .create({
@@ -48,7 +46,9 @@ export default class NewBill {
         this.fileUrl = fileUrl
         this.fileName = fileName
       }).catch(error => console.error(error))
+      
   }
+  
 
   handleSubmit = (e) => {
     e.preventDefault()
@@ -66,14 +66,12 @@ export default class NewBill {
       fileName: this.fileName,
       status: 'pending'
     } 
-      
+        
         this.updateBill(bill)
         this.onNavigate(ROUTES_PATH['Bills'])  
       }
   
-      
   
-
   updateBill = (bill) => { 
       if (this.store) { 
         this.store
@@ -83,7 +81,7 @@ export default class NewBill {
           this.onNavigate(ROUTES_PATH['Bills'])
         })
         .catch(error => console.error(error))
-      }  
-      console.log(this.store);
+      }
+      
   }
 }

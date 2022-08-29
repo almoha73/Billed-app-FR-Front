@@ -35,7 +35,7 @@ describe("When I am on NewBill Page", () => {
       document.body.appendChild(root)
       router()
   });
-  test.skip("Then mail icon in vertical layout should be highlighted ", async () => {
+  test("Then mail icon in vertical layout should be highlighted ", async () => {
     
     window.onNavigate(ROUTES_PATH["NewBill"]);
     await waitFor(() => screen.getByTestId("icon-mail"));
@@ -44,7 +44,7 @@ describe("When I am on NewBill Page", () => {
    
   });
 
-  test.skip("Then it should show the new bill form", () => {
+  test("Then it should show the new bill form", () => {
     const html = NewBillUI();
     document.body.innerHTML = html;
 
@@ -52,7 +52,7 @@ describe("When I am on NewBill Page", () => {
   });
 
   describe("when i click on the submit button", () => {
-    test.skip("the handleSubmit function is called", () => {
+    test("the handleSubmit function is called", () => {
       
       const html = NewBillUI();
       document.body.innerHTML = html;
@@ -128,17 +128,20 @@ describe("When I am on NewBill Page", () => {
 
     
     test("Then it should send the new bill to the mock API POST and fails with 404 message error", async () => {
-      console.error = jest.fn()
+      
       document.body.innerHTML = NewBillUI()
       mockStore.bills.mockImplementationOnce(() => {
         return {
+          create: () =>{
+            return Promise.resolve({fileUrl: 'https://localhost:3456/images/test.jpg', key: '1234'})
+          },
           update : () =>  {
-            return waitFor(()=>Promise.reject(new Error("Erreur 404")))
+            return Promise.reject(new Error("Erreur 404"))
           }
         }})
         
         window.onNavigate(ROUTES_PATH.NewBill); 
-      const store = null;
+      const store = mockStore;
 
       const newBillObject = new NewBill({
         document,
@@ -153,31 +156,33 @@ describe("When I am on NewBill Page", () => {
        fireEvent.submit(formNewBill)
        expect(handleSubmit).toHaveBeenCalled()
        await new Promise(process.nextTick)
-       expect(console.error).toHaveBeenCalled()
+       
       })
 
     test("Then it should send the new bill to the mock API POST and fails with 500 message error", async () => {
       mockStore.bills.mockImplementationOnce(() => {
-        list : () =>  {
-          return Promise.reject(new Error("Erreur 500"))
+        return {
+          list : () =>  {
+            return Promise.reject(new Error("Erreur 500"))  
+          },
+          create: () =>{
+            return Promise.reject(new Error("Erreur 500")) 
+          },
+          update : () =>  {
+            return Promise.reject(new Error("Erreur 404"))
         }
-      });
+        
+      }
+    });
       window.onNavigate(ROUTES_PATH.Bills)
        await new Promise(process.nextTick);
       const html = BillsUI({ error: "Erreur 500" });
       document.body.innerHTML = html;
       const message = screen.getByText(/Erreur 500/);
       expect(message).toBeTruthy();
-      console.error = jest.fn()
-      expect.assertions(1);
-      try{
-        await mockStore.bills
-      }catch{
-        expect (error).toEqual(console.error)
-      }
+      
     });
-      
-      
+          
   });
 })
 
@@ -221,32 +226,7 @@ describe("When I am on NewBill Page", () => {
       
       })
 
-      test('formData not to be null', () => {
       
-        const html = NewBillUI()
-        document.body.innerHTML = html
-        const newBillObject = new NewBill({
-         document,
-         onNavigate: (pathname) => document.body.innerHTML = ROUTES({ pathname }),
-         store: jest.fn(),
-         localStorage: window.localStorage
-        })
-        
-       const handle = jest.fn((e) => newBillObject.handleChangeFile(e))
-       const inputFile = screen.getByTestId('file')
-       const img = new File(['img'], 'image.png', {type:'image/png'})
-      
-       inputFile.addEventListener('change', (e) => {
-           handle(e)
-       })
-       userEvent.upload(inputFile, img)
-       const formData = new FormData()
-        const email = JSON.parse(localStorage.getItem("user")).email
-       formData.append('file', inputFile)
-       formData.append('email', email)
-       expect(formData).not.toBe(null)
-       
-      })
 })
 
 describe("When I select a file and the file format is not valid", () => {

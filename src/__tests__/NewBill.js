@@ -11,8 +11,8 @@ import router from "../app/Router.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
 import { fireEvent, waitFor, screen, getByRole } from "@testing-library/dom";
 import mockStore from "../__mocks__/store";
-import store from "../__mocks__/store";
-import { bills } from "../fixtures/bills.js"
+// import store from "../__mocks__/store";
+// import { bills } from "../fixtures/bills.js"
 
 
 
@@ -35,7 +35,7 @@ describe("When I am on NewBill Page", () => {
       document.body.appendChild(root)
       router()
   });
-  test("Then mail icon in vertical layout should be highlighted ", async () => {
+  test.skip("Then mail icon in vertical layout should be highlighted ", async () => {
     
     window.onNavigate(ROUTES_PATH["NewBill"]);
     await waitFor(() => screen.getByTestId("icon-mail"));
@@ -44,7 +44,7 @@ describe("When I am on NewBill Page", () => {
    
   });
 
-  test("Then it should show the new bill form", () => {
+  test.skip("Then it should show the new bill form", () => {
     const html = NewBillUI();
     document.body.innerHTML = html;
 
@@ -52,7 +52,7 @@ describe("When I am on NewBill Page", () => {
   });
 
   describe("when i click on the submit button", () => {
-    test("the handleSubmit function is called", () => {
+    test.skip("the handleSubmit function is called", () => {
       
       const html = NewBillUI();
       document.body.innerHTML = html;
@@ -162,7 +162,6 @@ describe("When I am on NewBill Page", () => {
           return Promise.reject(new Error("Erreur 500"))
         }
       });
-      
       window.onNavigate(ROUTES_PATH.Bills)
        await new Promise(process.nextTick);
       const html = BillsUI({ error: "Erreur 500" });
@@ -177,13 +176,26 @@ describe("When I am on NewBill Page", () => {
         expect (error).toEqual(console.error)
       }
     });
+      
+      
   });
 })
 
 
   describe("When I select a file and the file format is valid", () => {
       test('it should update the input field', () => {
-        
+        Object.defineProperty(window, "localStorage", {
+          value: localStorageMock,
+        });
+        window.localStorage.setItem(
+          "user",
+          JSON.stringify({
+            type: "Employee",
+              email: "employee@test-td",
+              password: "employee",
+              status: "connected",
+          })
+        );
         const html = NewBillUI()
         document.body.innerHTML = html
         const newBillObject = new NewBill({

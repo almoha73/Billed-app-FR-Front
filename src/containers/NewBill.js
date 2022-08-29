@@ -71,13 +71,14 @@ export default class NewBill {
         this.onNavigate(ROUTES_PATH['Bills'])  
       }
   
-  
+ 
   updateBill = (bill) => { 
       if (this.store) { 
         this.store
         .bills()
         .update({data: JSON.stringify(bill), selector: this.billId})
         .then(() => {
+           /* istanbul ignore next */
           this.onNavigate(ROUTES_PATH['Bills'])
         })
         .catch(error => console.error(error))

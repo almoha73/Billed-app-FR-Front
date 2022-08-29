@@ -37,10 +37,6 @@ describe("When I am on NewBill Page", () => {
   });
   test("Then mail icon in vertical layout should be highlighted ", async () => {
     
-    const root = document.createElement("div");
-    root.setAttribute("id", "root");
-    document.body.append(root);
-    router();
     window.onNavigate(ROUTES_PATH["NewBill"]);
     await waitFor(() => screen.getByTestId("icon-mail"));
     const windowIcon = screen.getByTestId("icon-mail");
@@ -156,7 +152,7 @@ describe("When I am on NewBill Page", () => {
        formNewBill.addEventListener("submit", handleSubmit)
        fireEvent.submit(formNewBill)
        expect(handleSubmit).toHaveBeenCalled()
-       await waitFor(() => new Promise(process.nextTick))
+       await new Promise(process.nextTick)
        expect(console.error).toHaveBeenCalled()
       })
 
@@ -166,19 +162,27 @@ describe("When I am on NewBill Page", () => {
           return Promise.reject(new Error("Erreur 500"))
         }
       });
+      
       window.onNavigate(ROUTES_PATH.Bills)
        await new Promise(process.nextTick);
       const html = BillsUI({ error: "Erreur 500" });
       document.body.innerHTML = html;
       const message = screen.getByText(/Erreur 500/);
       expect(message).toBeTruthy();
+      console.error = jest.fn()
+      expect.assertions(1);
+      try{
+        await mockStore.bills
+      }catch{
+        expect (error).toEqual(console.error)
+      }
     });
   });
 })
 
 
   describe("When I select a file and the file format is valid", () => {
-      test('it should update the input field', async () => {
+      test('it should update the input field', () => {
         
         const html = NewBillUI()
         document.body.innerHTML = html
@@ -195,7 +199,7 @@ describe("When I am on NewBill Page", () => {
        inputFile.addEventListener('change', (e) => {
            handle(e)
        })
-       await waitFor(() => {userEvent.upload(inputFile, img)})
+       userEvent.upload(inputFile, img)
        
        
        expect(handle).toHaveBeenCalled()
@@ -205,14 +209,14 @@ describe("When I am on NewBill Page", () => {
       
       })
 
-      test('formData not to be null', async () => {
-        
+      test('formData not to be null', () => {
+      
         const html = NewBillUI()
         document.body.innerHTML = html
         const newBillObject = new NewBill({
          document,
          onNavigate: (pathname) => document.body.innerHTML = ROUTES({ pathname }),
-         store: mockStore,
+         store: jest.fn(),
          localStorage: window.localStorage
         })
         
@@ -223,18 +227,18 @@ describe("When I am on NewBill Page", () => {
        inputFile.addEventListener('change', (e) => {
            handle(e)
        })
-       await waitFor(() => {userEvent.upload(inputFile, img)})
+       userEvent.upload(inputFile, img)
        const formData = new FormData()
         const email = JSON.parse(localStorage.getItem("user")).email
        formData.append('file', inputFile)
        formData.append('email', email)
-       
+       expect(formData).not.toBe(null)
        
       })
 })
 
 describe("When I select a file and the file format is not valid", () => {
-      test('it should not update the input field', async () => {
+      test('it should not update the input field',  () => {
         
          const html = NewBillUI()
          document.body.innerHTML = html
@@ -245,6 +249,7 @@ describe("When I select a file and the file format is not valid", () => {
           localStorage: window.localStorage
          })
          window.alert = jest.fn();
+         
         const handle = jest.fn((e) => newBillObject.handleChangeFile(e))
         const inputFile = screen.getByTestId('file')
         
@@ -252,8 +257,9 @@ describe("When I select a file and the file format is not valid", () => {
           handle(e)
         })
         const file = new File(['img'], 'test.pdf', {type:'application/pdf'})
-        await waitFor(() => {userEvent.upload(inputFile, file)})
+        userEvent.upload(inputFile, file)
         expect(handle).toHaveBeenCalled()
+        
        expect(inputFile.files[0]).toStrictEqual(file)
         expect(inputFile.files[0].name).toBe('test.pdf')
         expect(window.alert).toBeCalled()

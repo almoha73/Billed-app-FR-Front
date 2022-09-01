@@ -9,11 +9,8 @@ import NewBill from "../containers/NewBill.js";
 import BillsUI from "../views/BillsUI.js";
 import router from "../app/Router.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
-import { fireEvent, waitFor, screen, getByRole } from "@testing-library/dom";
+import { fireEvent, waitFor, screen} from "@testing-library/dom";
 import mockStore from "../__mocks__/store";
-// import store from "../__mocks__/store";
-// import { bills } from "../fixtures/bills.js"
-
 
 
 describe("When I am on NewBill Page", () => {
@@ -45,18 +42,19 @@ describe("When I am on NewBill Page", () => {
   });
 
   test("Then it should show the new bill form", () => {
-    const html = NewBillUI();
-    document.body.innerHTML = html;
+    window.onNavigate(ROUTES_PATH["NewBill"]);
+    // const html = NewBillUI();
+    // document.body.innerHTML = html;
 
     expect(screen.getByTestId("form-new-bill")).toBeTruthy();
   });
 
   describe("when i click on the submit button", () => {
     test("the handleSubmit function is called", () => {
+      window.onNavigate(ROUTES_PATH["NewBill"]);
+      // const html = NewBillUI();
+      // document.body.innerHTML = html;
       
-      const html = NewBillUI();
-      document.body.innerHTML = html;
-
       const onNavigate = pathname => {
         const html = ROUTES({ pathname, data: [] });
         document.body.innerHTML = html;
@@ -77,7 +75,7 @@ describe("When I am on NewBill Page", () => {
     });
 
     test("the update bills function is executed with informations provided && send to the mock API POST", async () => {
-      document.body.innerHTML = NewBillUI()
+      window.onNavigate(ROUTES_PATH["NewBill"]);
       
       const onNavigate = jest.fn()
       const store = null;
@@ -129,7 +127,7 @@ describe("When I am on NewBill Page", () => {
     
     test("Then it should send the new bill to the mock API POST and fails with 404 message error", async () => {
       
-      document.body.innerHTML = NewBillUI()
+      window.onNavigate(ROUTES_PATH["NewBill"]);
       mockStore.bills.mockImplementationOnce(() => {
         return {
           create: () =>{
@@ -140,7 +138,7 @@ describe("When I am on NewBill Page", () => {
           }
         }})
         
-        window.onNavigate(ROUTES_PATH.NewBill); 
+       
       const store = mockStore;
 
       const newBillObject = new NewBill({
@@ -175,7 +173,7 @@ describe("When I am on NewBill Page", () => {
       }
     });
       window.onNavigate(ROUTES_PATH.Bills)
-       await new Promise(process.nextTick);
+       //await new Promise(process.nextTick);
       const html = BillsUI({ error: "Erreur 500" });
       document.body.innerHTML = html;
       const message = screen.getByText(/Erreur 500/);
@@ -189,18 +187,7 @@ describe("When I am on NewBill Page", () => {
 
   describe("When I select a file and the file format is valid", () => {
       test('it should update the input field', () => {
-        Object.defineProperty(window, "localStorage", {
-          value: localStorageMock,
-        });
-        window.localStorage.setItem(
-          "user",
-          JSON.stringify({
-            type: "Employee",
-              email: "employee@test-td",
-              password: "employee",
-              status: "connected",
-          })
-        );
+        
         const html = NewBillUI()
         document.body.innerHTML = html
         const newBillObject = new NewBill({
@@ -209,6 +196,7 @@ describe("When I am on NewBill Page", () => {
          store: mockStore,
          localStorage: window.localStorage
         })
+         window.onNavigate(ROUTES_PATH["NewBill"]);
        const handle = jest.fn((e) => newBillObject.handleChangeFile(e))
        const inputFile = screen.getByTestId('file')
        const img = new File(['img'], 'image.png', {type:'image/png'})
@@ -216,8 +204,12 @@ describe("When I am on NewBill Page", () => {
        inputFile.addEventListener('change', (e) => {
            handle(e)
        })
-       userEvent.upload(inputFile, img)
-       
+       fireEvent.change(inputFile, {
+        target: {
+          files: [img],
+        },
+      })
+      //userEvent.upload(inputFile, img) fonctionne aussi
        
        expect(handle).toHaveBeenCalled()
        expect(inputFile.files[0]).toStrictEqual(img)

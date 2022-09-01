@@ -71,3 +71,5 @@ class Store {
 }
 
 export default new Store()
+
+console.log(new Store);

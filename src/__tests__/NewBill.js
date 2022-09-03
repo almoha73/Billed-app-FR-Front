@@ -136,9 +136,8 @@ describe("When I am on NewBill Page", () => {
       expect(screen.getByText("Mes notes de frais")).toBeTruthy;
     });
 
-    test("the update bills function is executed with informations provided && send to the mock API POST", async () => {
+    test("the handleSubmit function is executed with informations provided && send to the mock API POST", async () => {
       
-      const onNavigate = jest.fn()
       const store = null;
 
       const newBillObject = new NewBill({
@@ -161,7 +160,7 @@ describe("When I am on NewBill Page", () => {
         fileName: null,
         status: "pending",
       }
-      newBillObject.updateBill = jest.fn()
+      
 
       screen.getByTestId('amount').value = billInformations.amount
       screen.getByTestId('expense-name').value = billInformations.name
@@ -171,18 +170,18 @@ describe("When I am on NewBill Page", () => {
       screen.getByTestId('pct').value = billInformations.pct
       screen.getByTestId('commentary').value = billInformations.commentary
 
-      userEvent.click(screen.getByTestId("btn-send-bill"))
-      expect(newBillObject.updateBill(billInformations)).toBeCalled
+      const btnSendBill = screen.getByTestId("form-new-bill");
+
+      const handleSubmitMock = jest.fn((e) => newBillObject.handleSubmit(e));
+      btnSendBill.addEventListener("submit", handleSubmitMock);
+      fireEvent.submit(btnSendBill);
+      expect(handleSubmitMock).toHaveBeenCalled();
       
       const postSpy = jest.spyOn(mockStore, 'bills');
       const bills = mockStore.bills(billInformations);
         expect(postSpy).toHaveBeenCalledTimes(1);
         expect((await bills.list()).length).toBe(4);
-        
-        await onNavigate(ROUTES_PATH['Bills'])
-        
-        expect(onNavigate).toBeCalledWith(ROUTES_PATH['Bills'])
-        
+           
     });
 
 
